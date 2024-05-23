@@ -1,7 +1,7 @@
-# HermesVault
+# Hermes Vault
 ## Private transactions on Algorand
 
-This document is a work in progress whitepaper for a system to send private transaction on Algorand.
+This document is a work in progress whitepaper for a system to make private transactions on Algorand.
 
 We stand on the shoulders of giants, leveraging the amazing work of [Zcash](https://z.cash/).  
 In fact, we aim to simplify Zcash constructions to achieve a user friendly balance between features and ease of use, compatible with an implementation at the smart contract level instead of at the protocol level.
@@ -20,7 +20,7 @@ A user can make deposits of algo tokens in any amount to the application
 contract, keeping a secret receipt. The originating address and the deposited amount are of course public on the blockchain.
 
 Then, with the secret receipt, a user can withdraw part, or all, of the deposited tokens to any address. The address signing the withdrawal transaction, the
-receiving address for the tokens (which might be the same as the signer), and the withdrawn amount will be public, but the source of the withdrawal, that is the original deposited amount and the original depositor address, will remain private.
+receiving address of the tokens (which might be the same as the signer), and the withdrawn amount will be public, but the source of the withdrawal, that is the original deposited amount and the original depositor address, will remain private.
 
 Moreover, the withdrawal transaction can be signed by a smart signature provided
 by the application, in which case only the receiving address and withdrawal amount
@@ -41,9 +41,9 @@ We have two zk-circuits, one for deposits, one for withdrawals.
 When a user make a deposit, the application stores a deposit note which encrypts the amount deposited and a secret known by the user in a merkle tree.   
 The deposit zk-circuit is used to prove that the encrypted note correctly stores the amount deposited.  
 
-To withdraw, the user uses the withdrawal zk-circuit to prove that he knows the secret associated with a deposit in the tree, that the deposit has not been withdrawn from already, and that they are withdrawing less than the deposited amount.
+To withdraw, the user uses the withdrawal zk-circuit to prove that he knows the secret associated with a deposit in the tree, that the deposit has not been withdrawn from already, and that they are withdrawing no more than the deposited amount.
 
-If so, the application let the user withdraws and saves a new deposit in the merkle tree with the change (what is left from the original deposit); it also invalidates the original deposit by storing a "nullifier" that prevents using that deposit again in the future.
+If so, the application lets the user withdraw and saves a new deposit in the merkle tree with the change (what is left from the original deposit); it also invalidates the original deposit by storing a "nullifier" that prevents using that deposit again in the future.
 
 More specifically, the on-chain application is composed of:
 * a main smart contract (SC) with the application logic
@@ -78,7 +78,7 @@ The user has a deposit `Note`, and its `Amount`, `K`, `R`.
 
 The user:
 1. Generates new random integers `K2`, `R2`
-2. Creates a new deposit note as `Note2 = hash(Change, K2, R2)` where `Change` is the amount left for future withdrawals from the original deposit after this withdrawal is processed. 
+2. Creates a new deposit note as `Note2 = hash(Change, K2, R2)` where `Change` is the amount left for future withdrawals from the original deposit after this withdrawal is processed (calculation details below). 
 3. Computes `Commitment2 = hash(Note2)`
 4. Creates a zk-proof with the withdrawal zk-circuit:
     - Public inputs:
@@ -98,7 +98,7 @@ The user:
         - `Index` -> leaf index of `Note` in merkle tree
         - `Path` -> merkle path for `Note`
 
-    The merkle `Path` starts with `Note` (unhashed `Commitment`), then its sibling, then all the parent nodes' siblings up to, but excluding the root.
+    The merkle `Path` starts with `Note` (unhashed `Commitment`), then its sibling, then all the parent nodes' siblings up to, but excluding, the root.
 
     The proof proves that:
     - `Nullifier == hash(Amount, K)`
@@ -133,7 +133,7 @@ Note that frontends will need to read from the blockchain all the inserted leave
 
 #### Nullifiers
 
-Nullifiers are needed to prevent a deposit to be withdrawn from twice. Eventually up to over 4 billion nullifiers need to be stored on-chain (using boxes) and paid by the application using a 32 level merkle tree; this is one reason why the application needs to charge a fee.
+Nullifiers are needed to prevent a deposit to be withdrawn from twice. With a 32 level merkle tree, eventually up to over 4 billion nullifiers need to be stored on-chain (using boxes) and paid by the application; this is one reason why the application needs to charge a fee.
 
 #### Roots
 
@@ -141,20 +141,20 @@ To avoid a situation where concurrent transactions submit a withdrawal zk-proof 
 
 #### Hash function
 
-To manage the merkle tree on-chain we need a hash function the AVM that matched a hash function we can use in the zk-circuits. The hash functions currently present on the AVM are not zk-friendly and cannot be implemented in circuits of practical sizes.
+To manage the merkle tree on-chain we need a hash function on the AVM that matches a hash function we can use in the zk-circuits. The hash functions currently present on the AVM are not zk-friendly and cannot be implemented in circuits of practical sizes.
 
 We need to bring to the AVM a new zk-friendly hash function, for instance as proposed by this [PR](https://github.com/algorand/go-algorand/pull/5978), to be able to deploy this application.
 
-By using a forked version of the AVM that incorporates the PR above, we were able to deploy a working version of this application.
+By using a forked version of the AVM that incorporates the PR above, we were able to deploy a working version of this application, so that's the last missing building block. In addition, one additional change to the AVM discussed below would also be very beneficial.
 
 #### Verifiers
 
-The WVC and DVC are generated by [AlgoPlonk](https://github.com/giuliop/AlgoPlonk) from the circuits' definitions; AlgoPlonk uses [gnark](https://github.com/Consensys/gnark) for circuit compilation and for proof generation and can be used by frontends for the latter.
+The DVC and WVC are generated by [AlgoPlonk](https://github.com/giuliop/AlgoPlonk) from the circuits' definitions; AlgoPlonk uses [gnark](https://github.com/Consensys/gnark) for circuit compilation and for proof generation and can be used by frontends for the latter.
 
-AlgoPlonk offers a [trusted setup](https://github.com/giuliop/AlgoPlonk#trusted-setup) for both curved BN254 and BLS12-381 but only the BN254 one is large enough to support the withdrawal circuit. Until a new trusted setup ceremony is run for curve BLS12-381 in the future, only the BN254 can be used by this application for now.
+AlgoPlonk offers a [trusted setup](https://github.com/giuliop/AlgoPlonk#trusted-setup) for both curves BN254 and BLS12-381 but only the BN254 setup is large enough to support the withdrawal circuit. Until a new trusted setup ceremony is run for curve BLS12-381 in the future, only the BN254 can be used for this application.
 
 At the moment the verifiers need to be smart contracts since as smart signatures they exceed the maximum allowed smart signature length of 1 KB. Given that a BN254 verifier consumes ~150,000 opcode budget and that updating a 32 level merkle tree with the hash function defined in the [PR](https://github.com/algorand/go-algorand/pull/5978) above costs ~45,000 more, we end up exceeding the maximum pooled opcode budget.  
-For this reason, to implement a working application with the forked AVM we had to split deposit and withdrawals in two subsequent transactions, one to verify the zk-proof and store a success receipt, and a following one to actual insert the deposit/change in the merkle tree.  
+For this reason, to implement a working application with the forked AVM we had to split both deposits and withdrawals in two subsequent transactions, one to verify the zk-proof and store a success receipt, and a following one to then insert the deposit/change in the merkle tree.  
 It works, at the cost of a less smooth user experience, but ideally we can make the verifiers smart signatures accessing their extra opcode budget pool and do everything in one transaction.  
 This will be possible if [this](https://github.com/algorand/go-algorand/issues/5990) is implemented.
 
@@ -170,7 +170,7 @@ A possible decentralization path in stages could be the following:
 
 3. Control of the treasury is ceded to the community
 
-This last step could be accomplished in different ways; here are some:
+This last step could be accomplished in different ways; here are some preliminary ideas, not an exhaustive list:
 * A token is created (e.g., fairly distributed to the application users) and the token owners can vote on how to use the treasury
 * Like the above, but instead of voting, the treasury pays itself to the token owners
 * The treasury is redirected to the fee sink
@@ -178,9 +178,9 @@ This last step could be accomplished in different ways; here are some:
 ### Compliance considerations
 Frontends giving access to the application, being centralized entities, will need a compliance strategy to comply with the laws and regulations of the jurisdictions they operate in.
 
-A strategy to be able to selectively disclose the link between a withdrawal and its originating deposit while giving guarantee to the users that the frontend cannot access their funds is the following: the frontend stores `Amount` and secret `K`, but not secret `R`, of deposits, and `Change` and secret `K2`, but not secret `R2`, of withdrawals.
+A strategy to be able to selectively disclose the link between a withdrawal and its originating deposit while giving guarantee to the users that the frontend cannot access their funds is the following: the frontend stores `Amount` and secret `K`, but not secret `R`, for deposits, and `Change` and secret `K2`, but not secret `R2`, for withdrawals.
 
-This allows the frontend to reveal the link between withdrawals and deposits if compelled to, but not having access to secret `R` (or `R2`) the frontend cannot touch users' funds.
+This allows the frontend to reveal the link between withdrawals and deposits if compelled to. At the same time, not having access to secret `R` (or `R2`) the frontend cannot touch users' funds.
 
 ### Conclusions
 
