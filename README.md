@@ -17,22 +17,15 @@ HermesVault's smart contracts are permissionless, so anybody can build frontends
 
 ### Application overview
 
-A user can make deposits of algo tokens in any amount to the application
-contract, keeping a secret note. The originating address and the deposited amount are of course public on the blockchain.
+A user can make deposits of algo tokens in any amount to the application contract, keeping a secret note. The originating address and the deposited amount are of course public on the blockchain.
 
 Then, with the secret note, a user can withdraw part, or all, of the deposited tokens to any address. The address signing the withdrawal transaction, the
 receiving address of the tokens (which might be the same as the signer), and the withdrawn amount will be public, but the source of the withdrawal, that is the original deposited amount and the original depositor address, will remain private.
 
-Moreover, the withdrawal transaction can be signed by a smart signature provided
-by the application, in which case only the receiving address and withdrawal amount
-will be public.
-This let the receiving address can be a zero balance account
-(e.g., a new account with no history) since the smart signature will pay the
-transaction fees from the withdrawal amount.
+Moreover, the withdrawal transaction can be signed by a smart signature provided by the application, in which case only the receiving address and withdrawal amount will be public.
+This let the receiving address can be a zero balance account (e.g., a new account with no history) since the smart signature will pay the transaction fees from the withdrawal amount.
 
-If only part of the tokens of the original deposit are withdrawn, the application
-will create a new deposit with the "change" amount to be used for future
-withdrawals with the same privacy guarantees, based on a new secret receipt held by the user.
+If only part of the tokens of the original deposit are withdrawn, the application will create a new deposit with the "change" amount to be used for future withdrawals with the same privacy guarantees, based on a new secret receipt held by the user.
 
 ### Decentralization path
 
@@ -42,4 +35,4 @@ Like [Prometheus](https://en.wikipedia.org/wiki/Prometheus)' gift of fire, this 
 
 As the project creator I will make no financial gain from this project.
 
-Before MainNet launch, the plan for full decentralization and community ownership will be published.
+Here is the draft [tokenomics](https://github.com/giuliop/HermesVault/blob/main/tokenomics.md), open for community feedback. Please review and share any suggestions for improvement!
