@@ -6,11 +6,12 @@ HermesVault enables private transactions on Algorand leveraging zero knowledge p
 We stand on the shoulders of giants, leveraging the pioneering work of [Zcash](https://z.cash/).
 In fact, we aim to simplify Zcash constructions to achieve a user friendly balance between features and ease of use, compatible with an implementation at the smart contract level instead of at the protocol level.
 
-In a nutshell, HermesVault let users deposit algo tokens (in any amount) in the application smart contract, providing them with a secret note. Later, with that secret note, users can withdraw all or part of their deposit to any address of their choice, including addresses with zero balance and no history with transaction fees paid directlty by the application.
+In a nutshell, HermesVault let users deposit algo tokens (in any amount) in the application smart contract, providing them with a secret note. Later, with that secret note, users can withdraw all or part of their deposit to any address of their choice, including addresses with zero balance and no history with transaction fees paid directlty by the application from the
+original deposit.
 
-HermesVault has been deployed to TestNet and you can help test it here: [hermesvault.org](https://hermesvault.org/)
+HermesVault has been deployed to TestNet and you can help test it here using the reference frontend: [hermesvault.org](https://hermesvault.org/)
 
-HermesVault is fully open-source, read the frontend code at [HermesVault-frontend](https://github.com/giuliop/HermesVault-frontend) and the smartcontract code at [HermesVault-smartcontracts](https://github.com/giuliop/HermesVault-smartcontracts).
+HermesVault is fully open-source, read the reference frontend code at [HermesVault-frontend](https://github.com/giuliop/HermesVault-frontend) and the smartcontract code at [HermesVault-smartcontracts](https://github.com/giuliop/HermesVault-smartcontracts).
 
 HermesVault's smart contracts are permissionless, so anybody can build frontends for HermesVault. Feel free to get in touch if you want to do that !
 
@@ -27,12 +28,16 @@ This let the receiving address can be a zero balance account (e.g., a new accoun
 
 If only part of the tokens of the original deposit are withdrawn, the application will create a new deposit with the "change" amount to be used for future withdrawals with the same privacy guarantees, based on a new secret receipt held by the user.
 
-### Decentralization path
 
-HermesVault will be a fully decentralized project, 100% owned by its users.
+## A public good
 
-Like [Prometheus](https://en.wikipedia.org/wiki/Prometheus)' gift of fire, this is a gift of privacy to the Algorand community, a public good.
+The HermesVault smart contract is a **public good** and charges no protocol fee.
+It is an immutable contract, with no owner and no manager, fully permissionless.
 
-As the project creator I will make no financial gain from this project.
+To use the smart contracts the only fees to be covered are the algorand blockchain fees, in particular:
+* For withdrawals, 0.0153 algo to cover the storage minimum balance requirement increase borne by the smart contract
+* To use HermesVault smart signature to pay the withdrawal transaction fees, 0.06 algo to fund those
 
-Here is the draft [tokenomics](https://github.com/giuliop/HermesVault/blob/main/tokenomics.md), open for community feedback. Please review and share any suggestions for improvement!
+Both fees will be taken from the original deposit, allowing a zero balance account to withdraw.
+
+Anybody can offer a fontend for HermesVault or compose and integrate it in new applications and workflows. Frontends and applications integrating HermesVault are free to charge their users what they like
