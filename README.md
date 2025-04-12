@@ -41,7 +41,7 @@ To use the smart contract the only fees to be covered are the algorand blockchai
 Both fees will be taken from the original deposit, allowing a zero balance account to withdraw.
 
 If the TSS is not used, 0.06 algo will be paid in trasanction fees by the signer.
-For deposit, 0.056 algo will be paid in transactoin fees by the signer.
+For deposit, 0.056 algo will be paid in transaction fees by the signer.
 Surprisingly, the bulk of these fees are needed to cover the computation cost of the new merkle root after each deposit/withdrawal.
 The cost of the zk verification is only 0.008 algo.
 
