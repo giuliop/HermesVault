@@ -9,7 +9,7 @@ In fact, we aim to simplify Zcash constructions to achieve a user friendly balan
 In a nutshell, HermesVault let users deposit algo tokens (in any amount) in the application smart contract, providing them with a secret note. Later, with that secret note, users can withdraw all or part of their deposit to any address of their choice, including addresses with zero balance and no history with transaction fees paid directlty by the application from the
 original deposit.
 
-HermesVault has been deployed to TestNet and you can help test it here using the reference frontend: [hermesvault.org](https://hermesvault.org/)
+HermesVault has been deployed to MainNet with app id 2952336704 and you can access it here using the reference frontend: [hermesvault.org](https://hermesvault.org/)
 
 HermesVault is fully open-source, read the reference frontend code at [HermesVault-frontend](https://github.com/giuliop/HermesVault-frontend) and the smartcontract code at [HermesVault-smartcontracts](https://github.com/giuliop/HermesVault-smartcontracts).
 
